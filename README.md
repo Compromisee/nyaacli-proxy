@@ -1,4 +1,4 @@
-# nyaacli-proxy
+# Nyaa.cli
 
 <p align="center">
   <img src="https://img.shields.io/github/stars/Compromisee/nyaacli-proxy?style=for-the-badge&color=yellow" alt="Stars">
