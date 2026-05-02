@@ -476,8 +476,8 @@ SOFTWARE.
 ### Special Thanks
 
 - The **nyaa.si** team for maintaining a reliable public RSS feed
-- The **fansub community** — groups like SubsPlease, Erai-raws, Ember, Kaleido, Judas, and many others who make anime accessible worldwide
 - Everyone who stars ⭐ and shares this project
+- Fontawesome for favicon!
 
 ---
 
