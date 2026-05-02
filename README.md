@@ -7,7 +7,6 @@
   <img src="https://hitscounter.dev/api/hit?url=https%3A%2F%2Fgithub.com%2FCompromisee%2Fnyaacli-proxy&label=Views&icon=github&color=%230d6efd&message=&style=for-the-badge&tz=UTC">
   <img src="https://img.shields.io/badge/dependencies-0-brightgreen?style=for-the-badge" alt="Dependencies">
   <img src="https://img.shields.io/badge/node-%3E%3D16-green?style=for-the-badge&logo=nodedotjs" alt="Node">
-  <img src="https://img.shields.io/github/license/Compromisee/nyaacli-proxy?style=for-the-badge" alt="License">
 </p>
 
 <p align="center">
