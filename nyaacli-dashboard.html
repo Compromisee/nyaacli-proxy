@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" href="video.svg" type="image/x-icon">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NyaaCLI — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --bg2: #13161e;
+    --bg3: #1a1e28;
+    --bg4: #222736;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --accent: #7c6af7;
+    --accent2: #5b4de0;
+    --accent-glow: rgba(124,106,247,0.15);
+    --green: #3dd68c;
+    --green-bg: rgba(61,214,140,0.1);
+    --red: #f05c5c;
+    --red-bg: rgba(240,92,92,0.1);
+    --amber: #f5a623;
+    --amber-bg: rgba(245,166,35,0.1);
+    --blue: #4b9cf5;
+    --blue-bg: rgba(75,156,245,0.1);
+    --text: #e8eaf0;
+    --text2: #9199ab;
+    --text3: #5c6273;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Sora', sans-serif;
+    --r: 8px;
+    --r2: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+
+  /* Layout */
+  .shell { display: flex; height: 100vh; overflow: hidden; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 220px;
+    min-width: 220px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .sidebar-logo {
+    padding: 20px 18px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-title {
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+  .logo-sub {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 2px;
+  }
+  .sidebar-section {
+    padding: 14px 12px 8px;
+  }
+  .sidebar-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 0 6px;
+    margin-bottom: 6px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 8px;
+    border-radius: var(--r);
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text2);
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: var(--accent-glow); color: var(--accent); }
+  .nav-icon { width: 16px; height: 16px; flex-shrink: 0; }
+  .nav-badge {
+    margin-left: auto;
+    background: var(--accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 99px;
+    font-family: var(--mono);
+  }
+  .sidebar-bottom {
+    margin-top: auto;
+    padding: 14px 12px;
+    border-top: 1px solid var(--border);
+  }
+  .status-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    margin-right: 6px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .status-text { font-size: 12px; color: var(--text3); }
+
+  /* Main content */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* Topbar */
+  .topbar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .search-wrap {
+    flex: 1;
+    position: relative;
+    max-width: 520px;
+  }
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text3);
+    pointer-events: none;
+  }
+  .search-input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 9px 12px 9px 38px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--text3); }
+  .search-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--r);
+    padding: 9px 18px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .search-btn:hover { background: var(--accent2); }
+  .search-btn:active { transform: scale(0.97); }
+  .topbar-actions { display: flex; gap: 8px; margin-left: auto; }
+  .icon-btn {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 8px 10px;
+    cursor: pointer;
+    color: var(--text2);
+    font-size: 12px;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .icon-btn:hover { border-color: var(--border2); color: var(--text); }
+
+  /* Filter bar */
+  .filterbar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+  .filter-label { font-size: 12px; color: var(--text3); margin-right: 2px; }
+  .pill-group { display: flex; gap: 4px; }
+  .pill {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 3px 12px;
+    font-size: 12px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .pill:hover { border-color: var(--border2); color: var(--text); }
+  .pill.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+  .filter-select {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 4px 8px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 12px;
+    outline: none;
+    cursor: pointer;
+  }
+  .filter-select:focus { border-color: var(--accent); }
+  .divider-v { width: 1px; height: 20px; background: var(--border); flex-shrink: 0; }
+
+  /* Content area */
+  .content-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* Stats row */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    padding: 14px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .stat-card.purple::before { background: var(--accent); }
+  .stat-card.green::before { background: var(--green); }
+  .stat-card.blue::before { background: var(--blue); }
+  .stat-card.amber::before { background: var(--amber); }
+  .stat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .stat-val { font-family: var(--mono); font-size: 22px; font-weight: 600; }
+  .stat-card.purple .stat-val { color: var(--accent); }
+  .stat-card.green .stat-val { color: var(--green); }
+  .stat-card.blue .stat-val { color: var(--blue); }
+  .stat-card.amber .stat-val { color: var(--amber); }
+  .stat-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  /* Results section */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .section-title { font-size: 13px; font-weight: 500; color: var(--text); }
+  .result-count { font-family: var(--mono); font-size: 12px; color: var(--text3); }
+  .section-actions { margin-left: auto; display: flex; gap: 8px; }
+
+  /* Results table */
+  .results-table-wrap {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    overflow: hidden;
+  }
+  .results-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  .results-table th {
+    background: var(--bg3);
+    color: var(--text3);
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 9px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .results-table th:hover { color: var(--text); }
+  .results-table th.sorted { color: var(--accent); }
+  .sort-arrow { margin-left: 4px; font-size: 10px; }
+  .results-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .results-table tr:last-child td { border-bottom: none; }
+  .results-table tr:hover td { background: var(--bg3); }
+  .col-name { max-width: 340px; }
+  .torrent-name {
+    color: var(--text);
+    cursor: pointer;
+    transition: color 0.15s;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .torrent-name:hover { color: var(--accent); }
+  .torrent-meta { font-size: 11px; color: var(--text3); margin-top: 2px; font-family: var(--mono); }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .badge-trusted { background: var(--green-bg); color: var(--green); }
+  .badge-remake { background: var(--red-bg); color: var(--red); }
+  .badge-normal { background: var(--bg4); color: var(--text2); }
+  .badge-a { background: var(--blue-bg); color: var(--blue); }
+  .badge-batch { background: var(--amber-bg); color: var(--amber); }
+  .col-size { font-family: var(--mono); font-size: 12px; color: var(--text2); white-space: nowrap; }
+  .col-date { font-family: var(--mono); font-size: 11px; color: var(--text3); white-space: nowrap; }
+  .seeds { color: var(--green); font-family: var(--mono); font-size: 12px; font-weight: 500; }
+  .leeches { color: var(--red); font-family: var(--mono); font-size: 12px; }
+  .downloads-count { color: var(--text2); font-family: var(--mono); font-size: 12px; }
+  .row-actions { display: flex; gap: 6px; }
+  .row-btn {
+    background: var(--bg4);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    font-family: var(--sans);
+  }
+  .row-btn:hover { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+  .row-btn.magnet:hover { background: rgba(61,214,140,0.1); border-color: var(--green); color: var(--green); }
+
+  /* Pagination */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .page-btn {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-family: var(--mono);
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .page-btn:hover { border-color: var(--border2); color: var(--text); }
+  .page-btn.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+  .page-btn:disabled { opacity: 0.35; cursor: default; }
+
+  /* Download Queue Panel */
+  .queue-panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    overflow: hidden;
+  }
+  .queue-header {
+    background: var(--bg3);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+  .queue-title { font-size: 13px; font-weight: 500; }
+  .queue-count {
+    background: var(--accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 99px;
+    font-family: var(--mono);
+  }
+  .queue-toggle { margin-left: auto; color: var(--text3); font-size: 12px; transition: transform 0.2s; }
+  .queue-toggle.open { transform: rotate(180deg); }
+  .queue-body { max-height: 300px; overflow-y: auto; }
+  .queue-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .queue-item:last-child { border-bottom: none; }
+  .queue-item:hover { background: var(--bg3); }
+  .queue-icon { flex-shrink: 0; }
+  .queue-name {
+    flex: 1;
+    font-size: 12px;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .queue-size { font-family: var(--mono); font-size: 11px; color: var(--text3); white-space: nowrap; }
+  .queue-status { font-size: 11px; white-space: nowrap; }
+  .queue-remove {
+    background: none;
+    border: none;
+    color: var(--text3);
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1;
+    transition: all 0.15s;
+  }
+  .queue-remove:hover { background: var(--red-bg); color: var(--red); }
+  .progress-bar {
+    height: 3px;
+    background: var(--bg4);
+    border-radius: 2px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 1s linear;
+  }
+  .progress-fill.done { background: var(--green); }
+
+  /* Quality score */
+  .q-score {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: default;
+  }
+  .q-bar {
+    width: 36px;
+    height: 4px;
+    background: var(--bg4);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .q-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+  .q-s { color: #ffd700; }
+  .q-a { color: var(--green); }
+  .q-b { color: var(--blue); }
+  .q-c { color: var(--amber); }
+  .q-d { color: var(--text2); }
+  .q-fill-s { background: #ffd700; }
+  .q-fill-a { background: var(--green); }
+  .q-fill-b { background: var(--blue); }
+  .q-fill-c { background: var(--amber); }
+  .q-fill-d { background: var(--text3); }
+
+  .q-tooltip-wrap { position: relative; }
+  .q-tooltip {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: var(--r);
+    padding: 10px 12px;
+    width: 210px;
+    z-index: 99;
+    font-size: 11px;
+  }
+  .q-tooltip-wrap:hover .q-tooltip { display: block; }
+  .q-tooltip-title { font-family: var(--mono); font-size: 12px; font-weight: 600; margin-bottom: 7px; }
+  .q-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; gap: 6px; }
+  .q-row-label { color: var(--text2); }
+  .q-row-mini { width: 50px; height: 3px; background: var(--bg4); border-radius: 2px; overflow: hidden; }
+  .q-row-fill { height: 100%; background: var(--accent); border-radius: 2px; }
+  .q-row-val { font-family: var(--mono); font-size: 10px; color: var(--text); min-width: 28px; text-align: right; }
+
+  /* Quality filter pills */
+  .quality-legend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .q-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--text3);
+    font-family: var(--mono);
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: background 0.15s;
+  }
+  .q-legend-item:hover { background: var(--bg3); }
+  .q-legend-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+  /* Empty state */
+  .empty-state {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text3);
+  }
+  .empty-icon { font-size: 32px; margin-bottom: 12px; }
+  .empty-text { font-size: 13px; }
+
+  /* Toast notification */
+  .toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 1000;
+    pointer-events: none;
+  }
+  .toast {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: var(--r);
+    padding: 10px 16px;
+    font-size: 13px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: auto;
+    animation: slideIn 0.25s ease, fadeOut 0.3s ease 2.5s forwards;
+    max-width: 300px;
+  }
+  @keyframes slideIn {
+    from { transform: translateX(20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+  .toast-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .toast.success .toast-dot { background: var(--green); }
+  .toast.info .toast-dot { background: var(--blue); }
+  .toast.warn .toast-dot { background: var(--amber); }
+
+  /* Loading overlay */
+  .loading-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(13,15,20,0.7);
+    z-index: 50;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+    border-radius: var(--r2);
+  }
+  .loading-overlay.show { display: flex; }
+  .spinner {
+    width: 28px; height: 28px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-family: var(--mono); font-size: 12px; color: var(--text2); }
+
+  /* CLI terminal panel */
+  .terminal {
+    background: #0a0b0f;
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    overflow: hidden;
+    max-height: 220px;
+  }
+  .terminal-bar {
+    background: var(--bg3);
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .term-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .td-red { background: #f05c5c; }
+  .td-amber { background: #f5a623; }
+  .td-green { background: #3dd68c; }
+  .term-title { margin-left: 8px; font-family: var(--mono); font-size: 11px; color: var(--text3); }
+  .terminal-body { padding: 12px 16px; font-family: var(--mono); font-size: 12px; overflow-y: auto; max-height: 180px; }
+  .term-line { margin-bottom: 3px; }
+  .term-prompt { color: var(--accent); }
+  .term-cmd { color: var(--text); }
+  .term-out { color: var(--text3); }
+  .term-success { color: var(--green); }
+  .term-err { color: var(--red); }
+  .term-cursor { display: inline-block; width: 8px; height: 13px; background: var(--accent); vertical-align: text-bottom; animation: blink 1.2s step-end infinite; }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-title">nyaacli</div>
+      <div class="logo-sub">nyaa.si GUI Dashboard</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigation</div>
+      <div class="nav-item active" onclick="setView('search')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6.5" cy="6.5" r="4.5"/><path d="M10 10l3 3"/></svg>
+        Search
+      </div>
+      <div class="nav-item" onclick="setView('queue')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h8M2 12h5"/></svg>
+        Download Queue
+        <span class="nav-badge" id="queue-nav-count">0</span>
+      </div>
+      <div class="nav-item" onclick="setView('terminal')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="14" height="12" rx="2"/><path d="M4 6l3 3-3 3M8 12h4"/></svg>
+        Terminal
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Categories</div>
+      <div class="nav-item" onclick="filterCat('all')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+        All
+      </div>
+      <div class="nav-item" onclick="filterCat('Anime')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M5 7.5c.5-.5 1-.5 1.5 0s1 .5 1.5 0M8 11c.8-.5 1.5-.5 2 0"/><circle cx="6" cy="6" r="1" fill="currentColor"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg>
+        Anime
+      </div>
+      <div class="nav-item" onclick="filterCat('Manga')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="10" height="13" rx="1"/><path d="M5 4h5M5 7h5M5 10h3"/></svg>
+        Manga
+      </div>
+      <div class="nav-item" onclick="filterCat('Music')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 12V4l7-1.5V11"/><circle cx="4" cy="12" r="2"/><circle cx="11" cy="11" r="2"/></svg>
+        Music
+      </div>
+      <div class="nav-item" onclick="filterCat('Live Action')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="1"/><path d="M5 3V1M11 3V1M1 7h14"/></svg>
+        Live Action
+      </div>
+      <div class="nav-item" onclick="filterCat('Software')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 6 7 10 3 14"/><line x1="9" y1="14" x2="13" y2="14"/></svg>
+        Software
+      </div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <span class="status-dot"></span>
+      <span class="status-text">Connected to nyaa.si</span>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="search-wrap">
+        <svg class="search-icon" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6.5" cy="6.5" r="4.5"/><path d="M10 10l3.5 3.5"/></svg>
+        <input type="text" class="search-input" id="main-search" placeholder="Search nyaa.si (e.g. 'One Piece 1080p')" value="Frieren">
+      </div>
+      <button class="search-btn" onclick="doSearch()">Search</button>
+      <div class="topbar-actions">
+        <button class="icon-btn" onclick="toggleSort()">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h12M4 8h8M6 12h4"/></svg>
+          Sort
+        </button>
+        <button class="icon-btn" title="Refresh" onclick="doSearch()">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 8A5 5 0 1 1 8 3"/><polyline points="13 3 13 8 8 8"/></svg>
+        </button>
+        <button class="icon-btn" onclick="copyCommand()">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="9" height="11" rx="1"/><path d="M3 12H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v1"/></svg>
+          Copy CLI
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="filterbar">
+      <span class="filter-label">Filter:</span>
+      <div class="pill-group" id="filter-pills">
+        <div class="pill active" onclick="setFilter('all', this)">All</div>
+        <div class="pill" onclick="setFilter('trusted', this)">Trusted</div>
+        <div class="pill" onclick="setFilter('no-remake', this)">No Remake</div>
+        <div class="pill" onclick="setFilter('batch', this)">Batch</div>
+      </div>
+      <div class="divider-v"></div>
+      <span class="filter-label">Quality:</span>
+      <div class="pill-group" id="quality-pills">
+        <div class="pill active" onclick="setQualityFilter('all', this)">All</div>
+        <div class="pill" onclick="setQualityFilter('S', this)" style="color:#ffd700">S</div>
+        <div class="pill" onclick="setQualityFilter('A', this)">A</div>
+        <div class="pill" onclick="setQualityFilter('B', this)">B</div>
+        <div class="pill" onclick="setQualityFilter('C', this)">C+</div>
+      </div>
+      <div class="divider-v"></div>
+      <span class="filter-label">Category:</span>
+      <select class="filter-select" id="cat-select" onchange="doSearch()">
+        <option value="0_0">All Categories</option>
+        <option value="1_0" selected>Anime</option>
+        <option value="1_2">Anime — English</option>
+        <option value="1_4">Anime — Non-English</option>
+        <option value="1_1">Anime — AMV</option>
+        <option value="2_0">Audio</option>
+        <option value="2_1">Audio — Lossless</option>
+        <option value="3_0">Literature</option>
+        <option value="4_0">Live Action</option>
+        <option value="5_0">Pictures</option>
+        <option value="6_0">Software</option>
+      </select>
+      <select class="filter-select" id="sort-select" onchange="doSearch()">
+        <option value="quality" selected>Quality ★</option>
+        <option value="resolution">Resolution ↕</option>
+        <option value="id">Date</option>
+        <option value="seeds">Seeders</option>
+        <option value="size">Size</option>
+        <option value="downloads">Downloads</option>
+      </select>
+      <select class="filter-select" id="order-select" onchange="doSearch()">
+        <option value="desc" selected>Descending</option>
+        <option value="asc">Ascending</option>
+      </select>
+      <div class="divider-v"></div>
+      <span class="filter-label">Res:</span>
+      <div class="pill-group" id="res-pills">
+        <div class="pill active" onclick="setResFilter('all', this)">All</div>
+        <div class="pill" onclick="setResFilter('2160', this)" style="color:var(--amber)">4K</div>
+        <div class="pill" onclick="setResFilter('1080', this)">1080p</div>
+        <div class="pill" onclick="setResFilter('720', this)">720p</div>
+        <div class="pill" onclick="setResFilter('480', this)">480p</div>
+      </div>
+      <div class="divider-v"></div>
+      <span class="filter-label" id="results-label" style="color:var(--text2)">75 results</span>
+    </div>
+
+    <!-- Content -->
+    <div class="content-area" id="content-area">
+
+      <!-- Stats -->
+      <div class="stats-row" id="stats-row">
+        <div class="stat-card purple">
+          <div class="stat-label">Total Results</div>
+          <div class="stat-val" id="stat-total">75</div>
+          <div class="stat-sub">for "Frieren"</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Trusted Uploads</div>
+          <div class="stat-val" id="stat-trusted">38</div>
+          <div class="stat-sub">51% of results</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-label">Total Seeders</div>
+          <div class="stat-val" id="stat-seeds">12,481</div>
+          <div class="stat-sub">across all results</div>
+        </div>
+        <div class="stat-card amber">
+          <div class="stat-label">Queue</div>
+          <div class="stat-val" id="stat-queue">0</div>
+          <div class="stat-sub">torrents queued</div>
+        </div>
+      </div>
+
+      <!-- Results Table -->
+      <div style="position: relative;">
+        <div class="section-header">
+          <div class="section-title">Search Results</div>
+          <div class="result-count" id="result-count">showing 15 of 75</div>
+          <div class="section-actions">
+            <button class="icon-btn" onclick="selectAll()">Select All</button>
+            <button class="icon-btn" onclick="queueSelected()" id="queue-sel-btn" style="display:none">Queue Selected</button>
+          </div>
+        </div>
+
+        <div class="results-table-wrap" id="results-wrap">
+          <div class="loading-overlay" id="loading-overlay">
+            <div class="spinner"></div>
+            <div class="loading-text">Scraping nyaa.si...</div>
+          </div>
+          <table class="results-table" id="results-table">
+            <thead>
+              <tr>
+                <th style="width:30px"><input type="checkbox" id="chk-all" onchange="toggleAllChecks(this)" style="accent-color:var(--accent)"></th>
+                <th onclick="sortCol('quality')" class="sorted">Quality <span class="sort-arrow">↓</span></th>
+                <th onclick="sortCol('name')">Name <span class="sort-arrow"></span></th>
+                <th onclick="sortCol('category')">Category <span class="sort-arrow"></span></th>
+                <th onclick="sortCol('size')">Size <span class="sort-arrow"></span></th>
+                <th onclick="sortCol('date')">Date <span class="sort-arrow"></span></th>
+                <th onclick="sortCol('seeds')">⬆ Seeds <span class="sort-arrow">↓</span></th>
+                <th onclick="sortCol('leeches')">⬇ Leech <span class="sort-arrow"></span></th>
+                <th onclick="sortCol('downloads')">DLs <span class="sort-arrow"></span></th>
+                <th style="width:160px">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="results-body"></tbody>
+          </table>
+          <div class="pagination" id="pagination"></div>
+        </div>
+      </div>
+
+      <!-- Download Queue -->
+      <div class="queue-panel" id="queue-panel">
+        <div class="queue-header" onclick="toggleQueue()">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1v10M4 7l4 4 4-4"/><path d="M1 13h14"/></svg>
+          <span class="queue-title">Download Queue</span>
+          <span class="queue-count" id="queue-count">0</span>
+          <span class="queue-toggle" id="queue-toggle">▼</span>
+        </div>
+        <div class="queue-body" id="queue-body" style="display:none">
+          <div class="empty-state" id="queue-empty">
+            <div class="empty-icon">📭</div>
+            <div class="empty-text">Queue is empty — add torrents from search results</div>
+          </div>
+          <div id="queue-items"></div>
+        </div>
+      </div>
+
+      <!-- Terminal -->
+      <div class="terminal" id="terminal-panel">
+        <div class="terminal-bar">
+          <div class="term-dot td-red"></div>
+          <div class="term-dot td-amber"></div>
+          <div class="term-dot td-green"></div>
+          <span class="term-title">nyaacli — bash</span>
+        </div>
+        <div class="terminal-body" id="term-body">
+          <div class="term-line"><span class="term-prompt">user@host</span> <span class="term-cmd">$ nyaacli --help</span></div>
+          <div class="term-line term-out">nyaacli 0.1.0 — CLI client for nyaa.si</div>
+          <div class="term-line term-out"></div>
+          <div class="term-line term-out">USAGE:</div>
+          <div class="term-line term-out">    nyaacli [OPTIONS] &lt;QUERY&gt;</div>
+          <div class="term-line term-out"></div>
+          <div class="term-line term-out">ARGS:</div>
+          <div class="term-line term-out">    &lt;QUERY&gt;    Anime name to search</div>
+          <div class="term-line term-out"></div>
+          <div class="term-line term-out">OPTIONS:</div>
+          <div class="term-line term-out">    -c, --category &lt;CAT&gt;   Category filter [default: 1_0]</div>
+          <div class="term-line term-out">    -f, --filter &lt;FILTER&gt;  Filter type (0=all 1=no-remake 2=trusted)</div>
+          <div class="term-line term-out">    -s, --sort &lt;SORT&gt;      Sort by (seeders/size/id/downloads)</div>
+          <div class="term-line term-out">    -h, --help              Print help information</div>
+          <div class="term-line term-out"></div>
+          <div class="term-line"><span class="term-prompt">user@host</span> <span class="term-cmd">$ nyaacli 'Frieren'</span></div>
+          <div class="term-line term-success">✓ Fetched 75 results for "Frieren"</div>
+          <div class="term-line term-out">┌─────┬──────────────────────────────────────────────────────────┬──────────┬──────┬───────┬───────┐</div>
+          <div class="term-line term-out">│  #  │ Name                                                     │ Size     │Seeds │Leech  │ DLs   │</div>
+          <div class="term-line term-out">├─────┼──────────────────────────────────────────────────────────┼──────────┼──────┼───────┼───────┤</div>
+          <div class="term-line term-out">│   1 │ [SubsPlease] Frieren - Beyond Journey's End (01-28)...  │ 15.2 GiB │ 4821 │   183 │ 92847 │</div>
+          <div class="term-line term-out">│   2 │ [Judas] Frieren - Beyond Journey's End S01 1080p...     │  9.4 GiB │ 3202 │    97 │ 71331 │</div>
+          <div class="term-line term-out">│ ... │ ...                                                      │ ...      │  ... │   ... │   ... │</div>
+          <div class="term-line"><span class="term-prompt">user@host</span> <span class="term-cmd">$ <span class="term-cursor"></span></span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════════
+//  NyaaCLI Dashboard — LIVE DATA via local proxy (server.js)
+//  Proxy must be running at http://localhost:3030
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const PROXY = 'http://localhost:3030';
+
+// ── Resolution rank for sort ──────────────────────────────────────────────────
+const RES_RANK = { '2160P':4, '4K':4, '1080P':3, '720P':2, '480P':1, '360P':0 };
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let allData       = [];          // raw items from proxy (current page)
+let filteredData  = [];          // after client-side filter + sort
+let totalFromApi  = 0;           // server-side total count
+let currentPage   = 1;
+const PER_PAGE    = 75;          // nyaa RSS returns up to 75 per page
+let queue         = [];
+let selectedRows  = new Set();
+let queueOpen     = false;
+let sortField     = 'quality';
+let sortDir       = 'desc';
+let activeFilter      = 'all';
+let activeQualityFilter = 'all';
+let activeResFilter   = 'all';   // NEW: resolution filter
+let proxyOnline   = false;
+
+// ── Proxy health check ────────────────────────────────────────────────────────
+async function checkProxy() {
+  try {
+    const r = await fetch(`${PROXY}/health`, { signal: AbortSignal.timeout(3000) });
+    if (r.ok) {
+      proxyOnline = true;
+      setProxyStatus(true);
+      return true;
+    }
+  } catch (_) {}
+  proxyOnline = false;
+  setProxyStatus(false);
+  return false;
+}
+
+function setProxyStatus(online) {
+  const dot  = document.querySelector('.status-dot');
+  const text = document.querySelector('.status-text');
+  if (online) {
+    dot.style.background  = 'var(--green)';
+    text.textContent      = 'Proxy online · nyaa.si live';
+  } else {
+    dot.style.background  = 'var(--red)';
+    text.textContent      = 'Proxy offline — start server.js';
+  }
+}
+
+// ── Fetch from proxy ──────────────────────────────────────────────────────────
+async function fetchFromProxy(query, page = 1) {
+  const cat    = document.getElementById('cat-select').value;
+  const sort   = document.getElementById('sort-select').value;
+  const order  = document.getElementById('order-select').value;
+
+  // Map UI sort values → nyaa sort params (quality is client-side only)
+  const nyaaSort = { quality:'seeders', id:'id', seeds:'seeders', size:'size', downloads:'downloads', resolution:'seeders' }[sort] || 'seeders';
+
+  // Map filter pill → nyaa filter param
+  const filterMap = { all:'0', 'no-remake':'1', trusted:'2', batch:'0' };
+  const nyaaFilter = filterMap[activeFilter] || '0';
+
+  const url = `${PROXY}/search?q=${encodeURIComponent(query)}&cat=${cat}&filter=${nyaaFilter}&sort=${nyaaSort}&order=${order}&p=${page}`;
+
+  addTermLine(`$ GET /search?q=${query}&cat=${cat}&sort=${nyaaSort}&p=${page}`, 'cmd');
+
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`Proxy returned ${r.status}`);
+  return r.json();
+}
+
+// ── Map proxy item → internal row ─────────────────────────────────────────────
+function mapItem(item, idx) {
+  return {
+    id:        idx,
+    name:      item.title,
+    category:  item.category,
+    size:      item.size || '?',
+    date:      item.pubDate ? new Date(item.pubDate) : new Date(),
+    seeds:     item.seeders  || 0,
+    leeches:   item.leechers || 0,
+    downloads: item.downloads || 0,
+    status:    item.status,
+    res:       item.resolution || 'Unknown',
+    enc:       (item.encodings || [])[0] || 'Unknown',
+    grp:       item.group || 'Unknown',
+    quality:   item.quality,
+    magnet:    item.magnetLink || '',
+    link:      item.link || '',
+  };
+}
+
+// ── Apply client-side filter + sort ──────────────────────────────────────────
+function applyFilter() {
+  let d = [...allData];
+
+  // Status filter (batch is client-side only — nyaa has no batch param)
+  if (activeFilter === 'batch') d = d.filter(r => r.status === 'batch');
+
+  // Quality tier filter
+  if (activeQualityFilter !== 'all') {
+    const order = ['S','A','B','C','D'];
+    const minIdx = order.indexOf(activeQualityFilter);
+    d = d.filter(r => order.indexOf(r.quality.tier) <= minIdx);
+  }
+
+  // Resolution filter (NEW)
+  if (activeResFilter !== 'all') {
+    d = d.filter(r => r.res.toUpperCase().includes(activeResFilter));
+  }
+
+  // Client-side sort
+  d.sort((a, b) => {
+    let va, vb;
+    if      (sortField === 'quality')    { va = a.quality.pct; vb = b.quality.pct; }
+    else if (sortField === 'resolution') { va = RES_RANK[a.res.toUpperCase()] ?? -1; vb = RES_RANK[b.res.toUpperCase()] ?? -1; }
+    else if (sortField === 'date')       { va = a.date.getTime(); vb = b.date.getTime(); }
+    else if (sortField === 'size')       { va = parseSize(a.size); vb = parseSize(b.size); }
+    else                                 { va = a[sortField] || 0; vb = b[sortField] || 0; }
+    return sortDir === 'desc' ? vb - va : va - vb;
+  });
+
+  filteredData = d;
+  currentPage  = 1;
+  renderResults();
+  updateStats();
+}
+
+function parseSize(s) {
+  const m = (s||'').match(/([\d.]+)\s*(MiB|GiB|KiB|TiB)/i);
+  if (!m) return 0;
+  const n = parseFloat(m[1]);
+  const u = m[2].toUpperCase();
+  return u === 'GIB' ? n*1024 : u === 'TIB' ? n*1024*1024 : u === 'KIB' ? n/1024 : n;
+}
+
+function updateStats() {
+  document.getElementById('stat-total').textContent   = totalFromApi || filteredData.length;
+  const trusted = filteredData.filter(r=>r.status==='trusted').length;
+  document.getElementById('stat-trusted').textContent = trusted;
+  const seeds = filteredData.reduce((s,r)=>s+r.seeds,0);
+  document.getElementById('stat-seeds').textContent   = seeds.toLocaleString();
+  document.getElementById('stat-queue').textContent   = queue.length;
+  document.getElementById('results-label').textContent = `${filteredData.length} results`;
+  document.getElementById('queue-nav-count').textContent = queue.length;
+  document.getElementById('queue-count').textContent  = queue.length;
+}
+
+function formatDate(d) {
+  if (!d || isNaN(d)) return '—';
+  const diff = Math.floor((Date.now() - d.getTime()) / 86400000);
+  if (diff === 0) return 'Today';
+  if (diff === 1) return 'Yesterday';
+  if (diff < 7)  return `${diff}d ago`;
+  if (diff < 30) return `${Math.floor(diff/7)}w ago`;
+  return d.toLocaleDateString('en-CA', {month:'short', day:'numeric', year:'2-digit'});
+}
+
+// ── Render results table ──────────────────────────────────────────────────────
+function renderResults() {
+  const body  = document.getElementById('results-body');
+  const total = filteredData.length;
+  const pages = Math.ceil(total / 15);   // display 15 per UI page
+  const uiPage = currentPage;
+  const start  = (uiPage-1) * 15;
+  const slice  = filteredData.slice(start, start+15);
+
+  document.getElementById('result-count').textContent = `showing ${start+1}–${start+slice.length} of ${total}`;
+
+  if (!slice.length) {
+    body.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--text3);font-family:var(--mono)">No results — try a different search or start server.js</td></tr>`;
+    renderPagination(0);
+    return;
+  }
+
+  body.innerHTML = slice.map(r => {
+    const statusBadge = {
+      trusted: '<span class="badge badge-trusted">Trusted</span>',
+      remake:  '<span class="badge badge-remake">Remake</span>',
+      normal:  '<span class="badge badge-normal">Normal</span>',
+      batch:   '<span class="badge badge-batch">Batch</span>',
+    }[r.status] || '<span class="badge badge-normal">Normal</span>';
+
+    // Resolution badge
+    const resColor = {'2160P':'var(--amber)','4K':'var(--amber)','1080P':'var(--green)','720P':'var(--blue)','480P':'var(--text3)'}[r.res.toUpperCase()] || 'var(--text3)';
+    const resBadge = `<span style="font-family:var(--mono);font-size:10px;font-weight:600;color:${resColor};background:rgba(255,255,255,0.04);padding:1px 6px;border-radius:4px;margin-left:4px">${r.res}</span>`;
+
+    const inQueue = queue.some(q=>q.id===r.id);
+    const checked = selectedRows.has(r.id);
+    const qd = r.quality;
+    const tierClass = `q-${qd.tier.toLowerCase()}`;
+    const fillClass = `q-fill-${qd.tier.toLowerCase()}`;
+    const bd = qd.breakdown;
+
+    const qualityCell = `<td>
+      <div class="q-tooltip-wrap">
+        <div class="q-score">
+          <div class="q-bar"><div class="q-fill ${fillClass}" style="width:${qd.pct}%"></div></div>
+          <span class="${tierClass}">${qd.tier}</span>
+          <span style="font-size:10px;color:var(--text3)">${qd.pct}</span>
+        </div>
+        <div class="q-tooltip">
+          <div class="q-tooltip-title ${tierClass}">${qd.tier}-Tier · ${qd.pct}/100</div>
+          ${[['Resolution',bd.res,30,r.res],['Encoding',bd.enc,25,r.enc],['Group',bd.grp,20,r.grp],['Trust',bd.trust,15,r.status],['Seeds',bd.seed,10,r.seeds+' seeds'],['Recency',bd.recency,10,'']].map(([lbl,v,mx])=>`
+          <div class="q-row">
+            <span class="q-row-label">${lbl}</span>
+            <div class="q-row-mini"><div class="q-row-fill" style="width:${Math.round(v/mx*100)}%"></div></div>
+            <span class="q-row-val">${v}/${mx}</span>
+          </div>`).join('')}
+        </div>
+      </div>
+    </td>`;
+
+    // Magnet open button — uses real magnet link
+    const hasMagnet = !!r.magnet;
+    const magnetBtn = hasMagnet
+      ? `<button class="row-btn magnet" onclick="openMagnet(${r.id})" title="${r.magnet.slice(0,80)}">⬇ Open</button>`
+      : `<button class="row-btn" style="opacity:.4;cursor:default" disabled>No magnet</button>`;
+
+    return `<tr data-id="${r.id}">
+      <td><input type="checkbox" ${checked?'checked':''} onchange="toggleRow(${r.id},this)" style="accent-color:var(--accent)"></td>
+      ${qualityCell}
+      <td class="col-name">
+        <div class="torrent-name" title="${r.name}" onclick="window.open('${r.link}','_blank')">${r.name}</div>
+        <div class="torrent-meta">${statusBadge}${resBadge}</div>
+      </td>
+      <td><span style="font-size:11px;color:var(--text2)">${r.category}</span></td>
+      <td class="col-size">${r.size}</td>
+      <td class="col-date">${formatDate(r.date)}</td>
+      <td class="seeds">${r.seeds.toLocaleString()}</td>
+      <td class="leeches">${r.leeches.toLocaleString()}</td>
+      <td class="downloads-count">${r.downloads.toLocaleString()}</td>
+      <td>
+        <div class="row-actions">
+          ${magnetBtn}
+          <button class="row-btn ${inQueue?'':'magnet'}" onclick="${inQueue?'removeFromQueue':'addToQueue'}(${r.id})">${inQueue?'✓ Queued':'+ Queue'}</button>
+          <button class="row-btn" onclick="copyMagnet(${r.id})">Copy</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  renderPagination(pages);
+}
+
+function renderPagination(pages) {
+  const el = document.getElementById('pagination');
+  if (pages <= 1) { el.innerHTML = ''; return; }
+  let html = `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>← Prev</button>`;
+  const s = Math.max(1, currentPage-2), e = Math.min(pages, currentPage+2);
+  if (s > 1) html += `<button class="page-btn" onclick="goPage(1)">1</button>${s>2?'<span style="color:var(--text3);font-size:12px">…</span>':''}`;
+  for (let p=s; p<=e; p++) html += `<button class="page-btn ${p===currentPage?'active':''}" onclick="goPage(${p})">${p}</button>`;
+  if (e < pages) html += `${e<pages-1?'<span style="color:var(--text3);font-size:12px">…</span>':''}<button class="page-btn" onclick="goPage(${pages})">${pages}</button>`;
+  html += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===pages?'disabled':''}>Next →</button>`;
+  el.innerHTML = html;
+}
+
+function goPage(p) {
+  if (p < 1 || p > Math.ceil(filteredData.length/15)) return;
+  currentPage = p;
+  renderResults();
+  document.getElementById('results-wrap').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// ── Search ────────────────────────────────────────────────────────────────────
+async function doSearch(page = 1) {
+  const q = document.getElementById('main-search').value.trim();
+  if (!q) { showToast('Enter a search query', 'warn'); return; }
+
+  const overlay = document.getElementById('loading-overlay');
+  overlay.classList.add('show');
+
+  // Check proxy first
+  if (!proxyOnline) {
+    const ok = await checkProxy();
+    if (!ok) {
+      overlay.classList.remove('show');
+      showToast('Proxy offline — run: node server.js', 'warn');
+      addTermLine('✗ Proxy not reachable at localhost:3030', 'err');
+      return;
+    }
+  }
+
+  try {
+    const data = await fetchFromProxy(q, page);
+    allData      = (data.items || []).map(mapItem);
+    totalFromApi = data.total || allData.length;
+    applyFilter();
+    overlay.classList.remove('show');
+    addTermLine(`✓ ${data.count} results fetched (${totalFromApi} total) for "${q}"`, 'success');
+    showToast(`Found ${data.count} results for "${q}"`, 'success');
+    document.querySelector('.stat-card.purple .stat-sub').textContent = `for "${q}"`;
+  } catch (err) {
+    overlay.classList.remove('show');
+    proxyOnline = false;
+    setProxyStatus(false);
+    addTermLine(`✗ Error: ${err.message}`, 'err');
+    showToast(`Error: ${err.message}`, 'warn');
+  }
+}
+
+document.getElementById('main-search').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doSearch();
+});
+
+// ── Filters ───────────────────────────────────────────────────────────────────
+function setFilter(f, el) {
+  activeFilter = f;
+  document.querySelectorAll('#filter-pills .pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  // trusted / no-remake need a re-fetch (nyaa server-side filter)
+  if (f === 'trusted' || f === 'no-remake' || f === 'all') doSearch();
+  else applyFilter();
+}
+
+function setQualityFilter(tier, el) {
+  activeQualityFilter = tier;
+  document.querySelectorAll('#quality-pills .pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  applyFilter();
+}
+
+// NEW: resolution filter
+function setResFilter(res, el) {
+  activeResFilter = res;
+  document.querySelectorAll('#res-pills .pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  applyFilter();
+}
+
+function filterCat(cat) {
+  const sel = document.getElementById('cat-select');
+  if (cat === 'all')         sel.value = '0_0';
+  else if (cat === 'Anime')  sel.value = '1_0';
+  else if (cat === 'Music')  sel.value = '2_0';
+  else if (cat === 'Manga')  sel.value = '3_0';
+  else if (cat === 'Live Action') sel.value = '4_0';
+  else if (cat === 'Software')    sel.value = '6_0';
+  doSearch();
+}
+
+function sortCol(field) {
+  if (sortField === field) sortDir = sortDir === 'desc' ? 'asc' : 'desc';
+  else { sortField = field; sortDir = 'desc'; }
+  // resolution sort: server-side sort won't help — just resort client data
+  // quality/resolution are pure client-side; others trigger re-fetch for accuracy
+  if (['quality','resolution'].includes(field)) applyFilter();
+  else { document.getElementById('sort-select').value = field; doSearch(); }
+}
+
+function toggleSort() {
+  sortDir = sortDir === 'desc' ? 'asc' : 'desc';
+  applyFilter();
+  showToast(`Sorted ${sortDir}ending`, 'info');
+}
+
+// ── Magnet actions ────────────────────────────────────────────────────────────
+function openMagnet(id) {
+  const entry = allData.find(r=>r.id===id);
+  if (!entry || !entry.magnet) return;
+  window.location.href = entry.magnet;
+  showToast('Opening magnet in torrent client…', 'success');
+  addTermLine(`$ xdg-open "${entry.magnet.slice(0,70)}..."`, 'cmd');
+  addTermLine(`✓ Handed off to system torrent client`, 'success');
+}
+
+function copyMagnet(id) {
+  const entry = allData.find(r=>r.id===id);
+  if (!entry) return;
+  if (entry.magnet) {
+    navigator.clipboard?.writeText(entry.magnet).catch(()=>{});
+    showToast('Magnet link copied!', 'info');
+  } else {
+    showToast('No magnet available for this entry', 'warn');
+  }
+}
+
+function copyCommand() {
+  const q    = document.getElementById('main-search').value.trim();
+  const cat  = document.getElementById('cat-select').value;
+  const sort = document.getElementById('sort-select').value;
+  const cmd  = `nyaacli '${q}' --category ${cat} --sort ${sort}`;
+  navigator.clipboard?.writeText(cmd).catch(()=>{});
+  showToast(`Copied: ${cmd}`, 'info');
+}
+
+// ── Queue ─────────────────────────────────────────────────────────────────────
+function addToQueue(id) {
+  const entry = allData.find(r=>r.id===id);
+  if (!entry || queue.some(q=>q.id===id)) return;
+  queue.push({...entry, progress: 0, qStatus: 'queued'});
+  renderResults();
+  renderQueue();
+  updateStats();
+  showToast(`Queued: ${entry.name.slice(0,45)}…`, 'success');
+  addTermLine(`$ nyaacli queue --add "${entry.name.slice(0,50)}"`, 'cmd');
+}
+
+function removeFromQueue(id) {
+  queue = queue.filter(q=>q.id!==id);
+  renderResults();
+  renderQueue();
+  updateStats();
+  showToast('Removed from queue', 'warn');
+}
+
+function renderQueue() {
+  const items = document.getElementById('queue-items');
+  const empty = document.getElementById('queue-empty');
+  if (!queue.length) { items.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+  items.innerHTML = queue.map(q => {
+    const statusColor = q.qStatus==='done' ? 'var(--green)' : q.qStatus==='downloading' ? 'var(--accent)' : 'var(--text3)';
+    const statusText  = q.qStatus==='done' ? '✓ Done' : q.qStatus==='downloading' ? `${q.progress}%` : 'Queued';
+    return `<div class="queue-item">
+      <svg class="queue-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="${statusColor}" stroke-width="1.5"><path d="M8 1v10M4 7l4 4 4-4"/><path d="M1 13h14"/></svg>
+      <div style="flex:1;min-width:0">
+        <div class="queue-name" title="${q.name}">${q.name}</div>
+        <div class="progress-bar"><div class="progress-fill ${q.qStatus==='done'?'done':''}" style="width:${q.progress}%"></div></div>
+      </div>
+      <span class="queue-size">${q.size}</span>
+      <span class="queue-status" style="color:${statusColor}">${statusText}</span>
+      <button class="queue-remove" onclick="${q.magnet?`openMagnet(${q.id})`:''}">▶</button>
+      <button class="queue-remove" onclick="removeFromQueue(${q.id})">×</button>
+    </div>`;
+  }).join('');
+}
+
+function toggleQueue() {
+  queueOpen = !queueOpen;
+  document.getElementById('queue-body').style.display = queueOpen ? '' : 'none';
+  document.getElementById('queue-toggle').classList.toggle('open', queueOpen);
+}
+
+// ── Selections ────────────────────────────────────────────────────────────────
+function toggleRow(id, el) {
+  if (el.checked) selectedRows.add(id); else selectedRows.delete(id);
+  document.getElementById('queue-sel-btn').style.display = selectedRows.size > 0 ? '' : 'none';
+}
+
+function toggleAllChecks(el) {
+  const s = (currentPage-1)*15;
+  filteredData.slice(s, s+15).forEach(r => el.checked ? selectedRows.add(r.id) : selectedRows.delete(r.id));
+  document.getElementById('queue-sel-btn').style.display = selectedRows.size > 0 ? '' : 'none';
+  renderResults();
+}
+
+function selectAll() {
+  document.getElementById('chk-all').checked = true;
+  toggleAllChecks(document.getElementById('chk-all'));
+}
+
+function queueSelected() {
+  selectedRows.forEach(id => addToQueue(id));
+  selectedRows.clear();
+  document.getElementById('queue-sel-btn').style.display = 'none';
+  renderResults();
+  if (!queueOpen) toggleQueue();
+}
+
+// ── Terminal ──────────────────────────────────────────────────────────────────
+function addTermLine(text, type='out') {
+  const body = document.getElementById('term-body');
+  const line = document.createElement('div');
+  line.className = 'term-line';
+  if (type === 'cmd') {
+    line.innerHTML = `<span class="term-prompt">user@host</span> <span class="term-cmd">${text}</span>`;
+  } else {
+    line.className += ` term-${type}`;
+    line.textContent = text;
+  }
+  body.insertBefore(line, body.lastElementChild);
+  body.scrollTop = body.scrollHeight;
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg, type='info') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<div class="toast-dot"></div><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+
+// ── Views ─────────────────────────────────────────────────────────────────────
+function setView(v) {
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  if (v==='queue')    { if (!queueOpen) toggleQueue(); document.getElementById('queue-panel').scrollIntoView({behavior:'smooth'}); }
+  if (v==='terminal') { document.getElementById('terminal-panel').scrollIntoView({behavior:'smooth'}); }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(async () => {
+  await checkProxy();
+  if (proxyOnline) {
+    doSearch();
+  } else {
+    addTermLine('✗ Proxy offline. Run:  node server.js', 'err');
+    addTermLine('  Then refresh this page.', 'out');
+    showToast('Start server.js first — see README.md', 'warn');
+  }
+})();
+</script>
+</body>
+</html>

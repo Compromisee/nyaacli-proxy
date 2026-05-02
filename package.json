@@ -1,0 +1,16 @@
+{
+  "name": "nyaacli-proxy",
+  "version": "1.0.0",
+  "description": "CORS proxy for nyaa.si — powers the nyaacli GUI dashboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": ["nyaa", "anime", "torrent", "proxy"],
+  "license": "MIT",
+  "dependencies": {}
+}
