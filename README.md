@@ -1,5 +1,6 @@
-# Nyaa.cli
-![title](/img/title)
+
+![title](/img/title.png)
+---
 <p align="center">
   <img src="https://img.shields.io/github/stars/Compromisee/nyaacli-proxy?style=for-the-badge&color=yellow" alt="Stars">
   <img src="https://img.shields.io/github/v/release/Compromisee/nyaacli-proxy?style=for-the-badge&color=red" alt="Release">
